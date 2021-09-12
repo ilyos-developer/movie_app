@@ -16,13 +16,16 @@ class LoadedState extends HomeState {
   final Movie movie;
   bool isLoading;
   List favList;
-  LoadedState({required this.movie, required this.isLoading, required this.favList});
+
+  LoadedState(
+      {required this.movie, required this.isLoading, required this.favList});
 }
 
 class ResultSearchState extends HomeState {
   final Movie movie;
+  final List favList;
 
-  ResultSearchState(this.movie);
+  ResultSearchState(this.movie, this.favList);
 }
 
 class NotResultSearchState extends HomeState {

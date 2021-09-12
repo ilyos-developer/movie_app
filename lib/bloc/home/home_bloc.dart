@@ -54,7 +54,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       try {
         movies = await ApiClient().searchMovie(event.name);
         if (movies.results.isNotEmpty) {
-          yield ResultSearchState(movies);
+          yield ResultSearchState(movies, favIdList);
         } else {
           yield NotResultSearchState(event.name);
         }

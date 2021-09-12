@@ -119,9 +119,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     return ListView.builder(
                       itemCount: state.movie.results.length,
                       itemBuilder: (context, index) => CardMovie(
-                        movies: state.movie.results,
-                        index: index,
-                      ),
+                          movies: state.movie.results,
+                          index: index,
+                          favList: state.favList),
                     );
                   }
                   if (state is NotResultSearchState) {
@@ -162,10 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: controller,
               itemCount: state.movie.results.length,
               itemBuilder: (context, index) => CardMovie(
-                movies: state.movie.results,
-                index: index,
-                favList: favList!
-              ),
+                  movies: state.movie.results, index: index, favList: favList!),
             ),
           ),
         ),
