@@ -1,5 +1,6 @@
 import 'package:catalog_films/bloc/home/home_bloc.dart';
-import 'package:catalog_films/widgets/card_movie.dart';
+import 'package:catalog_films/ui/widgets/card_movie.dart';
+import 'package:catalog_films/ui/widgets/error_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -25,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void onScroll() {
     if (bloc.state is LoadedState == false) return;
-    print("line 28");
     if (!controller.hasClients) return;
     final double maxHeight = controller.position.maxScrollExtent;
     final double currentHeight = controller.offset;
@@ -41,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Orientation orientation = MediaQuery.of(context).orientation;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -109,20 +110,40 @@ class _HomeScreenState extends State<HomeScreen> {
               child: BlocBuilder<HomeBloc, HomeState>(
                 builder: (context, state) {
                   if (state is LoadedState) {
-                    return buildMovies(state, favList: state.favList);
+                    return buildMovies(state, orientation,
+                        favList: state.favList);
                   }
                   if (state is LoadingState) {
-                    return buildMovies(state);
+                    return buildMovies(state, orientation,
+                        favList: state.favList);
                   }
                   if (state is ResultSearchState) {
                     print("line 117");
-                    return ListView.builder(
-                      itemCount: state.movie.results.length,
-                      itemBuilder: (context, index) => CardMovie(
-                          movies: state.movie.results,
-                          index: index,
-                          favList: state.favList),
-                    );
+                    return orientation == Orientation.portrait
+                        ? ListView.builder(
+                            itemCount: state.movie.results.length,
+                            itemBuilder: (context, index) => CardMovie(
+                                movies: state.movie.results,
+                                index: index,
+                                favList: state.favList),
+                          )
+                        : GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent:
+                                  MediaQuery.of(context).size.width / 2,
+                              childAspectRatio: 5 / 2,
+                            ),
+                            controller: controller,
+                            itemCount: state.movie.results.length,
+                            itemBuilder: (BuildContext ctx, index) {
+                              return CardMovie(
+                                movies: state.movie.results,
+                                index: index,
+                                favList: state.favList,
+                              );
+                            },
+                          );
                   }
                   if (state is NotResultSearchState) {
                     return Column(
@@ -140,6 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     );
                   }
+                  if (state is ErrorState) {
+                    return MyErrorWidget();
+                  }
                   return Center(child: CircularProgressIndicator());
                 },
               ),
@@ -150,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  buildMovies(var state, {List? favList}) {
+  buildMovies(var state, Orientation orientation, {List? favList}) {
     return Column(
       children: [
         Expanded(
@@ -158,12 +182,31 @@ class _HomeScreenState extends State<HomeScreen> {
             onRefresh: () async {
               bloc.add(GetRequest());
             },
-            child: ListView.builder(
-              controller: controller,
-              itemCount: state.movie.results.length,
-              itemBuilder: (context, index) => CardMovie(
-                  movies: state.movie.results, index: index, favList: favList!),
-            ),
+            child: orientation == Orientation.portrait
+                ? ListView.builder(
+                    controller: controller,
+                    itemCount: state.movie.results.length,
+                    itemBuilder: (context, index) => CardMovie(
+                      movies: state.movie.results,
+                      index: index,
+                      favList: favList,
+                    ),
+                  )
+                : GridView.builder(
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: MediaQuery.of(context).size.width / 2,
+                      childAspectRatio: 5 / 2,
+                    ),
+                    controller: controller,
+                    itemCount: state.movie.results.length,
+                    itemBuilder: (BuildContext ctx, index) {
+                      return CardMovie(
+                        movies: state.movie.results,
+                        index: index,
+                        favList: favList,
+                      );
+                    },
+                  ),
           ),
         ),
         Container(

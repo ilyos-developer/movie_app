@@ -31,15 +31,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeEvent event,
   ) async* {
     if (event is GetRequest) {
+      yield HomeInitial();
       try {
         movies = await ApiClient().getMovies();
         yield LoadedState(movie: movies, isLoading: false, favList: favIdList);
       } catch (e) {
         print("bloc: $e");
+        yield ErrorState(e.toString());
       }
     }
     if (event is NextPageEvent) {
-      yield LoadingState(movie: movies, isLoading: event.isLoading);
+      yield LoadingState(
+          movie: movies, isLoading: event.isLoading, favList: favIdList);
       try {
         (await ApiClient().getMovies(page: event.page))
             .results
@@ -47,6 +50,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         yield LoadedState(movie: movies, isLoading: false, favList: favIdList);
       } catch (e) {
         print(e);
+        yield ErrorState(e.toString());
       }
     }
     if (event is SearchMovieEvent) {

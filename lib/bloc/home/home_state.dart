@@ -8,8 +8,10 @@ class HomeInitial extends HomeState {}
 class LoadingState extends HomeState {
   final Movie movie;
   bool isLoading;
+  List favList;
 
-  LoadingState({required this.movie, required this.isLoading});
+  LoadingState(
+      {required this.movie, required this.isLoading, required this.favList});
 }
 
 class LoadedState extends HomeState {
@@ -32,4 +34,10 @@ class NotResultSearchState extends HomeState {
   final String message;
 
   NotResultSearchState(this.message);
+}
+
+class ErrorState extends HomeState {
+  final String message;
+
+  ErrorState(this.message);
 }
