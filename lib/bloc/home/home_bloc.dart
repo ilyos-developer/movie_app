@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:catalog_films/models/movie.dart';
 import 'package:catalog_films/repository/api_client.dart';
+import 'package:dio/dio.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -63,7 +64,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           yield NotResultSearchState(event.name);
         }
       } catch (e) {
-        yield NotResultSearchState(event.name);
+        if (e is DioError) {
+          yield ErrorState(e.toString());
+        } else {
+          yield NotResultSearchState(event.name);
+        }
       }
     }
     if (event is AddFavorite) {

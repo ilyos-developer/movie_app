@@ -5,7 +5,8 @@ class ApiClient {
   static const baseUrl = 'https://api.themoviedb.org/3';
   static const apiKey = "6ccd72a2a8fc239b13f209408fc31c33";
 
-  static BaseOptions options = BaseOptions(baseUrl: baseUrl, connectTimeout: 15000);
+  static BaseOptions options =
+      BaseOptions(baseUrl: baseUrl, connectTimeout: 15000);
   final Dio dio = Dio(options);
 
   final String lang = "ru";
@@ -23,17 +24,10 @@ class ApiClient {
   }
 
   Future searchMovie(String name) async {
-    try {
-      final response = await dio.get("/search/movie", queryParameters: {
-        "api_key": apiKey,
-        "language": lang,
-        "query": name
-      });
-      print(response.data);
-      final movies = Movie.fromJson(response.data);
-      return movies;
-    } catch (e) {
-      print(e);
-    }
+    final response = await dio.get("/search/movie",
+        queryParameters: {"api_key": apiKey, "language": lang, "query": name});
+    print(response.data);
+    final movies = Movie.fromJson(response.data);
+    return movies;
   }
 }
