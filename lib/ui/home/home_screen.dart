@@ -12,13 +12,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _searchController = TextEditingController();
 
-  final controller = ScrollController();
+  late ScrollController controller;
   int page = 1;
   late HomeBloc bloc;
   bool showCloseBtn = false;
 
   @override
   void initState() {
+    controller = ScrollController();
     bloc = BlocProvider.of<HomeBloc>(context);
     controller.addListener(onScroll);
     super.initState();
@@ -110,18 +111,16 @@ class _HomeScreenState extends State<HomeScreen> {
               child: BlocBuilder<HomeBloc, HomeState>(
                 builder: (context, state) {
                   if (state is LoadedState) {
-                    return buildMovies(state, orientation,
-                        favList: state.favList);
+                    return buildMovies(state, favList: state.favList);
                   }
                   if (state is LoadingState) {
-                    return buildMovies(state, orientation,
-                        favList: state.favList);
+                    return buildMovies(state, favList: state.favList);
                   }
                   if (state is ResultSearchState) {
-                    print("line 117");
                     return orientation == Orientation.portrait
                         ? ListView.builder(
                             itemCount: state.movie.results.length,
+                            controller: controller,
                             itemBuilder: (context, index) => CardMovie(
                                 movies: state.movie.results,
                                 index: index,
@@ -174,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  buildMovies(var state, Orientation orientation, {List? favList}) {
+  buildMovies(var state, {List? favList}) {
     return Column(
       children: [
         Expanded(
@@ -182,31 +181,37 @@ class _HomeScreenState extends State<HomeScreen> {
             onRefresh: () async {
               bloc.add(GetRequest());
             },
-            child: orientation == Orientation.portrait
-                ? ListView.builder(
-                    controller: controller,
-                    itemCount: state.movie.results.length,
-                    itemBuilder: (context, index) => CardMovie(
-                      movies: state.movie.results,
-                      index: index,
-                      favList: favList,
-                    ),
-                  )
-                : GridView.builder(
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: MediaQuery.of(context).size.width / 2,
-                      childAspectRatio: 5 / 2,
-                    ),
-                    controller: controller,
-                    itemCount: state.movie.results.length,
-                    itemBuilder: (BuildContext ctx, index) {
-                      return CardMovie(
+            child: OrientationBuilder(
+              builder: (context, orientation) => orientation ==
+                      Orientation.portrait
+                  ? ListView.builder(
+                      key: PageStorageKey<String>('listView'),
+                      controller: controller,
+                      itemCount: state.movie.results.length,
+                      itemBuilder: (context, index) => CardMovie(
                         movies: state.movie.results,
                         index: index,
                         favList: favList,
-                      );
-                    },
-                  ),
+                      ),
+                    )
+                  : GridView.builder(
+                      key: PageStorageKey<String>('listView'),
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent:
+                            MediaQuery.of(context).size.width / 2,
+                        childAspectRatio: 5 / 2,
+                      ),
+                      controller: controller,
+                      itemCount: state.movie.results.length,
+                      itemBuilder: (BuildContext ctx, index) {
+                        return CardMovie(
+                          movies: state.movie.results,
+                          index: index,
+                          favList: favList,
+                        );
+                      },
+                    ),
+            ),
           ),
         ),
         Container(
